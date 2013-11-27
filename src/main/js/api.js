@@ -4,7 +4,6 @@
 
         var api = this;
 
-        var host = window.parent.booklet ? window.parent.booklet.host : location.host;
         var port = "";
         if (host.indexOf(":") == -1) port = ":5711";
 
@@ -37,7 +36,7 @@
 
         function newSocket(o){
             var a = [o];
-            socket = new WebSocket('ws://' + host + port + '/ws', protocol);
+            socket = new WebSocket('ws://' + location.host + port + '/ws', protocol);
             socket.queue = function(o){a.push(o)};
             socket.onclose = function(){console.log("close socket");};
             socket.onerror = function(e){console.log(e);};
