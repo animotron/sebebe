@@ -71,7 +71,7 @@ public class Manager {
     }
 
     private void exec(Stream stream, ObjectNode node) {
-        //Log?
+        //XXX Log?
         if (node.size() != 1) return;
         ObjectNode callNode = _(node);
         if (callNode == null) {
@@ -128,7 +128,6 @@ public class Manager {
 
     public void shutdown() throws InterruptedException {
         tasks.shutdown();
-        
-        Thread.sleep(100);
+        Thread.sleep(100);  //XXX ???
     }
 }
