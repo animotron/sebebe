@@ -38,7 +38,7 @@ public class TasksQueue {
     private ExecutorService executor;
     
     public TasksQueue() {
-        executor = Executors.newFixedThreadPool(NTHREDS);
+        startup();
     }
     
     public void startup() {

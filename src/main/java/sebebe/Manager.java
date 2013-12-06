@@ -37,6 +37,8 @@ import java.util.Map.Entry;
  * @author <a href="mailto:shabanovd@gmail.com">Dmitriy Shabanov</a>
  */
 public class Manager {
+
+    private static final String _ = "_";
     
     static TasksQueue tasks = new TasksQueue();
 
@@ -47,108 +49,75 @@ public class Manager {
     }
 
     public void register(Function... f) {
-        for (Function i : f) {
+        for (Function i : f)
             map.put(i.getName(), i);
-        }
     }
 
     public void execute(Stream stream, String json) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
-        
         exec(stream, mapper.readTree(json));
     };
 
     private void exec(Stream stream, JsonNode n) {
-        
         System.out.println(n);
-        
-        if (n instanceof ObjectNode) {
+        if (n instanceof ObjectNode)
             exec(stream, (ObjectNode) n);
-        }
     };
 
+
+    private ObjectNode _(JsonNode node) {
+        JsonNode v = node.get(_);
+        return v instanceof ObjectNode ? (ObjectNode) v : null;
+    }
+
     private void exec(Stream stream, ObjectNode node) {
-        
-        JsonNode callNode = node.get("_");
-        
+        //Log?
+        if (node.size() != 1) return;
+        ObjectNode callNode = _(node);
         if (callNode == null) {
             //wrap
-            
-            Iterator<Entry<String, JsonNode>> iter = node.fields();
-            while (iter.hasNext()) {
-                Entry<String, JsonNode> field = iter.next();
-                
-                callNode = field.getValue().get("_");
-                
-                if (callNode == null) {
-                    
-                    JsonNode value = field.getValue();
-                    
-                    if (value instanceof ObjectNode) {
-                        
-                        //make copy
-                        ObjectNode obj = ((ObjectNode) value).deepCopy();
-                        
-                        ObjectNode paramsNode = node.objectNode();
-                        paramsNode.put(field.getKey(), obj);
-
-                        ObjectNode wrapNode = node.objectNode();
-                        wrapNode.put("_",  paramsNode);
-
-                        stream.write(wrapNode);
-                    }
-                
-                } else {
-                    
-                    JsonNode value = field.getValue();
-                    
-                    if (value instanceof ObjectNode) {
-                        
-                        //make copy
-                        ObjectNode obj = ((ObjectNode) value).deepCopy();
-                        
-                        //remove function call, leave params
-                        obj.remove("_");
-                        
-                        
-                        ObjectNode paramsNode = node.objectNode();
-                        paramsNode.put(field.getKey(), obj);
-                        
-                        ObjectNode wrapNode = node.objectNode();
-
-                        wrapNode.put("_",  paramsNode);
-
-                        call(stream, wrapNode, callNode);
-                    }
+            Entry<String, JsonNode> field = node.fields().next();
+            callNode = _(field.getValue());
+            if (callNode == null) {
+                JsonNode value = field.getValue();
+                if (value instanceof ObjectNode) {
+                    //make copy
+                    ObjectNode obj = ((ObjectNode) value).deepCopy();
+                    ObjectNode paramsNode = node.objectNode();
+                    paramsNode.put(field.getKey(), obj);
+                    ObjectNode wrapNode = node.objectNode();
+                    wrapNode.put(_,  paramsNode);
+                    stream.write(wrapNode);
+                }
+            } else {
+                JsonNode value = field.getValue();
+                if (value instanceof ObjectNode) {
+                    //make copy
+                    ObjectNode obj = ((ObjectNode) value).deepCopy();
+                    //remove function call, leave params
+                    obj.remove(_);
+                    ObjectNode paramsNode = node.objectNode();
+                    paramsNode.put(field.getKey(), obj);
+                    ObjectNode wrapNode = node.objectNode();
+                    wrapNode.put(_,  paramsNode);
+                    call(stream, wrapNode, callNode);
                 }
             }
-            
-        } else {
-            
-            //direct call
-            call(stream, null, callNode);
-        }
+        } else call(stream, null, callNode);
     }
     
-    private void call(Stream stream, ObjectNode wrapNode, JsonNode callNode) {
-        
-        Iterator<Map.Entry<String, JsonNode>> i = callNode.fields();
-        while (i.hasNext()) {
-            Map.Entry<String, JsonNode> entry = i.next();
-
-            String name = entry.getKey();
-
-            if (name != null && !name.isEmpty()) {
-
-                final Function function = map.get(name);
-            
-                if (function == null) {
-                    //XXX: log?
-                    //throw new IllegalArgumentException("Function '"+name+"' not found.");
-                    continue;
-                }
-
+    private void call(Stream stream, ObjectNode wrapNode, ObjectNode callNode) {
+        // XXX: Log? Merge?
+        if (callNode.size() != 1) return;
+        Map.Entry<String, JsonNode> entry = callNode.fields().next();
+        String name = entry.getKey();
+        if (name != null && !name.isEmpty()) {
+            final Function function = map.get(name);
+            if (function != null) {
                 tasks.call(function, entry.getValue(), stream.wrap(wrapNode));
+            } else {
+                //XXX: log?
+                //throw new IllegalArgumentException("Function '"+name+"' not found.");
             }
         }
     }
