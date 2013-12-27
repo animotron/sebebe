@@ -1,72 +1,38 @@
-sebebe = function(){
+sebebe = function(api){
 
-    function isObject(o) {
-        return o instanceof Object && !(o instanceof Array);
+    function isObject(o){
+        return o instanceof Object && ! (o instanceof Array || o instanceof Function);
     }
 
-    function call(o) {
-
+    function _(o){
+        if (!isObject(o)) return;
+        var name = o.key(0);
+        var param = o[name];
+        if (!isObject(param)) return;
+        var res = api[name](param);
+        if (!isObject(res)) return;
+        return res;
     }
 
-    var self = {
-        execute : function(o) {
-            if (isObject(o))
-                if (o._) call(o._);
-                else {
-
-                }
+    function call(o){
+        var name = o.key(0);
+        var param = o[name];
+        if (!isObject(param)) return;
+        var obj = {};
+        if (param._) {
+            var p = _(param._);
+            for (var i in p) obj[i] = p[i];
         }
+        for (var i in param) if (i != "_") obj[i] = param[i];
+        var res = {};
+        res[name] = obj;
+        return {_ : res};
+    }
+
+    return function(o){
+        if (!isObject(o)) return;
+        if (o._) return _(o._);
+        return call(o)
     };
 
-    return self;
-
 };
-
-Sebebe.prototype.execute = function(o){
-
-
-
-};
-
-
-(function(){
-
-    window.sebebe = {};
-
-    window.
-
-
-           Manager : function(){
-               var api = this;
-
-
-
-               function execute (o, level){
-                   function putAll(o, a) {
-                       for (var i in a)
-                           if (a[i] instanceof Array) putAll(obj, a[i]);
-                           else if (a[i] instanceof Object) obj[i] = a[i];
-                   }
-                   if (level > 1) return o;
-                   var obj = null;
-                   if (o instanceof Array)
-                       for (var i in o) execute(o[i]);
-                   else if (o instanceof Object)
-                       for (var name in o) {
-                           if (name[0] == "$") {
-                               var f = api[name.substring(1)];
-                               if (obj == null) obj = {};
-                               if (f instanceof  Function) putAll(obj, f(o[name]));
-                           } else {
-                               if (level == 0) name = "$" + name;
-                               if (obj == null) obj = {};
-                               obj[name] = o[i] instanceof Object ? execute(o[i], level + 1) : o[i];
-                           }
-                       }
-                   return obj;
-               }
-           }
-
-    }
-
-})();
