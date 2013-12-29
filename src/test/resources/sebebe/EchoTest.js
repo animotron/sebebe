@@ -34,11 +34,14 @@ function assertEquals(o1, o2) {
 
 tests({
     pingpong : function() {
+        assertEquals(f({ping : {pong : "test"}}), {_ : {ping : {pong : "test"}}});
+    },
+    pingpong : function() {
         var f = sebebe({
             ping : function(data) {
-                return data;
+                return {pong : data};
             }
         })
-        assertEquals(f({ping : {pong : "test"}}), {_ : {ping : {pong : "test"}}});
+        assertEquals(f({_ : {ping : {msg : "test"}}}), {pong : {msg : "test"}});
     }
 });
