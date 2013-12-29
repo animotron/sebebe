@@ -25,44 +25,20 @@
  *
  */
 
-var tests = function(testObject) {
-    var testCases = new java.util.ArrayList();
-    for (var name in testObject) {
-        if (testObject.hasOwnProperty(name)) {
-            testCases.add(new TestCase(name,testObject[name]));
-        }
-    }
-    return testCases;
-};
+load("src/main/resources/sebebe.js");
 
+function assertEquals(o1, o2) {
+    console.log(JSON.stringify(o1));
+    assert.assertEquals(JSON.stringify(o1), JSON.stringify(o2));
+}
 
 tests({
-    thisTestShouldPass : function() {
-        console.log("One == One");
-        assert.assertEquals("One","One");
-    },
-
-    thisTestShouldFail : function() {
-        console.log("Running a failing test");
-        assert.fail();
-    },
-
-    testAnEqualityFail : function() {
-        console.log("Running an equality fail test");
-        assert.assertEquals("One", "Two");
-    },
-
-    objectEquality : function() {
-        var a = { foo: 'bar', bar: 'baz' };
-        var b = a;
-        assert.assertEquals(a, b);
-    },
-
-    integerComparison : function() {
-        jsAssert.assertIntegerEquals(4, 4);
-    },
-
-    failingIntegerComparison : function() {
-        jsAssert.assertIntegerEquals(4, 5);
+    pingpong : function() {
+        var f = sebebe({
+            ping : function(data) {
+                return data;
+            }
+        })
+        assertEquals(f({ping : {pong : "test"}}), {_ : {ping : {pong : "test"}}});
     }
 });

@@ -35,7 +35,7 @@ import static org.junit.Assert.assertEquals;
 
 /**
  * @author <a href="mailto:gazdovsky@gmail.com">Evgeny Gazdovsky</a>
- * 
+ *
  */
 public class EchoTest {
 
@@ -52,21 +52,21 @@ public class EchoTest {
                 }
             },
             new Function("blah") {
-                
+
                 @Override
                 public void execute(JsonNode data, StreamResults stream) {
-                    
+
                     String msg = data.get("msg").asText();
-                    
+
                     for (int i = 1; i <= 2; i++) {
                         stream.put("msg"+i, TextNode.valueOf(msg));
                     }
                 }
             }
     );
-    
+
     class StreamImpl extends Stream {
-        
+
         public List<ObjectNode> recs = new ArrayList<ObjectNode>();
 
         @Override
@@ -74,20 +74,20 @@ public class EchoTest {
             recs.add(node);
         }
     };
-    
+
     @Test
     public void test01() throws Exception {
         StreamImpl stream = new StreamImpl();
-        
+
         api.startup();
 
         api.execute(stream, "{\"pong\":{\"ping\":\"hello\"}}");
-        
+
         api.shutdown();
-        
+
         assertEquals(1, stream.recs.size());
         assertEquals(
-            "{\"_\":{\"pong\":{\"ping\":\"hello\"}}}", 
+            "{\"_\":{\"pong\":{\"ping\":\"hello\"}}}",
             stream.recs.get(0).toString()
         );
     }
@@ -99,12 +99,12 @@ public class EchoTest {
         api.startup();
 
         api.execute(stream, "{\"pong\":{\"_\": {\"ping\":\"hello\"}}}");
-        
+
         api.shutdown();
-        
+
         assertEquals(1, stream.recs.size());
         assertEquals(
-            "{\"_\":{\"pong\":{\"msg\":\"hello\"}}}", 
+            "{\"_\":{\"pong\":{\"msg\":\"hello\"}}}",
             stream.recs.get(0).toString()
         );
     }
@@ -116,12 +116,12 @@ public class EchoTest {
         api.startup();
 
         api.execute(stream, "{\"_\":{\"ping\":\"hello\"}}");
-        
+
         api.shutdown();
-        
+
         assertEquals(1, stream.recs.size());
         assertEquals(
-            "{\"msg\":\"hello\"}", 
+            "{\"msg\":\"hello\"}",
             stream.recs.get(0).toString()
         );
     }
@@ -133,13 +133,13 @@ public class EchoTest {
         api.startup();
 
         api.execute(stream, "{\"pong\":{\"pong\":{\"_\":{\"ping\":\"hello\"}}}}");
-        
+
         api.shutdown();
-        
+
         //XXX: ??? assertEquals("{\"pong\":{\"pong\":{\"msg\":\"hello\"}}}", result);
         assertEquals(1, stream.recs.size());
         assertEquals(
-            "{\"_\":{\"pong\":{\"pong\":{\"_\":{\"ping\":\"hello\"}}}}}", 
+            "{\"_\":{\"pong\":{\"pong\":{\"_\":{\"ping\":\"hello\"}}}}}",
             stream.recs.get(0).toString()
         );
     }
@@ -151,9 +151,9 @@ public class EchoTest {
         api.startup();
 
         api.execute(stream, "{\"_\":{\"pank\":\"\"}}");
-        
+
         api.shutdown();
-        
+
         assertEquals(0, stream.recs.size());
     }
 
@@ -164,9 +164,9 @@ public class EchoTest {
         api.startup();
 
         api.execute(stream, "{\"pong\":{\"_\":{\"ping\":\"hello\"}, \"param\":\"test\"}}");
-        
+
         api.shutdown();
-        
+
         assertEquals(1, stream.recs.size());
         assertEquals(
             "{\"_\":"
@@ -176,7 +176,7 @@ public class EchoTest {
                         + "\"msg\":\"hello\""
                     + "}"
                 + "}"
-            + "}", 
+            + "}",
             stream.recs.get(0).toString()
         );
     }
@@ -188,9 +188,9 @@ public class EchoTest {
         api.startup();
 
         api.execute(stream, "{\"pong\":{\"_\":{\"blah\":{\"msg\":\"hello\"}}, \"param\":\"test\"}}");
-        
+
         api.shutdown();
-        
+
         assertEquals(2, stream.recs.size());
         assertEquals(
             "{\"_\":"
@@ -201,7 +201,7 @@ public class EchoTest {
                         + "\"msg1\":\"hello\""
                     + "}"
                 + "}"
-            + "}", 
+            + "}",
             stream.recs.get(0).toString()
         );
         assertEquals(
@@ -213,7 +213,7 @@ public class EchoTest {
                             + "\"msg2\":\"hello\""
                         + "}"
                     + "}"
-                + "}", 
+                + "}",
                 stream.recs.get(1).toString()
             );
     }
@@ -236,9 +236,9 @@ public class EchoTest {
                 + "\"param\":\"test\""
                 + "}"
             + "}");
-        
+
         api.shutdown();
-        
+
         assertEquals(2, stream.recs.size());
         assertEquals(
             "[{\"_\":"
