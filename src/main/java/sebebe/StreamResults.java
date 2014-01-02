@@ -32,34 +32,26 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  */
 public class StreamResults {
 
-    Stream _stream;
-    ObjectNode wrapNode;
+    private Stream stream;
+    private ObjectNode wrapNode;
     
-    protected StreamResults(Stream stream, ObjectNode obj) {
-        _stream = stream;
-        wrapNode = obj;
+    protected StreamResults(Stream stream, ObjectNode wrapNode) {
+        this.stream = stream;
+        this.wrapNode = wrapNode;
     }
 
     public void put(String field, JsonNode value) {
-        
         ObjectNode result;
-        
         if (wrapNode == null) {
-            
             result = instance.objectNode();
             result.put(field, value);
-
         } else {
-            
             result = wrapNode.deepCopy();
-            
             ObjectNode function = (ObjectNode) result.fields().next().getValue();
             ObjectNode params = (ObjectNode) function.fields().next().getValue();
-            
             params.put(field, value);
         }
-        
-        _stream.write(result);
+        stream.write(result);
     }
 
 }
