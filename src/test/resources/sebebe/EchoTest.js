@@ -33,15 +33,16 @@ function assertEquals(o1, o2) {
 }
 
 tests({
-    pingpong : function() {
+    pingpong1 : function() {
+        var f = sebebe();
         assertEquals(f({ping : {pong : "test"}}), {_ : {ping : {pong : "test"}}});
     },
-    pingpong : function() {
+    pingpong2 : function() {
         var f = sebebe({
             ping : function(data) {
                 return {pong : data};
             }
-        })
+        });
         assertEquals(f({_ : {ping : {msg : "test"}}}), {pong : {msg : "test"}});
     }
 });

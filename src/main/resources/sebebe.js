@@ -28,7 +28,7 @@
 sebebe = function(api){
 
     function isObject(o){
-        return o instanceof Object && ! (o instanceof Array || o instanceof Function);
+        return o instanceof Object && ! (o instanceof Array);
     }
 
     function first(o) {
@@ -40,24 +40,33 @@ sebebe = function(api){
         var name = first(o);
         var param = o[name];
         if (!isObject(param)) return;
-        var res = api[name](param);
-        if (!isObject(res)) return;
-        return res;
+        return api[name](param);
+    }
+
+    function wrap(name, param, p){
+        var obj = {};
+        for (var i in p) obj[i] = p[i];
+        for (var i in param) if (i != "_") obj[i] = param[i];
+        var res = {};
+        res[name] = obj;
+        return {_ : res};
     }
 
     function call(o){
         var name = first(o);
         var param = o[name];
         if (!isObject(param)) return;
-        var obj = {};
         if (param._) {
             var p = _(param._);
-            for (var i in p) obj[i] = p[i];
+            if (p instanceof Array) {
+                var res = [];
+                for (var i in p) res.push(wrap(name, param, p[i]));
+                return res
+            } else if (p instanceof Object) {
+                return wrap(name, param, p);
+            } else return;
         }
-        for (var i in param) if (i != "_") obj[i] = param[i];
-        var res = {};
-        res[name] = obj;
-        return {_ : res};
+        return wrap(name, param);
     }
 
     return function(o){
