@@ -52,23 +52,17 @@ public class EchoTest {
                 }
             },
             new Function("blah") {
-
                 @Override
                 public void execute(JsonNode data, StreamResults stream) {
-
                     String msg = data.get("msg").asText();
-
-                    for (int i = 1; i <= 2; i++) {
+                    for (int i = 1; i <= 2; i++)
                         stream.put("msg"+i, TextNode.valueOf(msg));
-                    }
                 }
             }
     );
 
     class StreamImpl extends Stream {
-
         public List<ObjectNode> recs = new ArrayList<ObjectNode>();
-
         @Override
         public void write(ObjectNode node) {
             recs.add(node);
@@ -78,13 +72,9 @@ public class EchoTest {
     @Test
     public void test01() throws Exception {
         StreamImpl stream = new StreamImpl();
-
         api.startup();
-
         api.execute(stream, "{\"pong\":{\"ping\":\"hello\"}}");
-
         api.shutdown();
-
         assertEquals(1, stream.recs.size());
         assertEquals(
             "{\"_\":{\"pong\":{\"ping\":\"hello\"}}}",
@@ -95,13 +85,9 @@ public class EchoTest {
     @Test
     public void test02() throws Exception {
         StreamImpl stream = new StreamImpl();
-
         api.startup();
-
         api.execute(stream, "{\"pong\":{\"_\": {\"ping\":\"hello\"}}}");
-
         api.shutdown();
-
         assertEquals(1, stream.recs.size());
         assertEquals(
             "{\"_\":{\"pong\":{\"msg\":\"hello\"}}}",
@@ -112,13 +98,9 @@ public class EchoTest {
     @Test
     public void test03() throws Exception {
         StreamImpl stream = new StreamImpl();
-
         api.startup();
-
         api.execute(stream, "{\"_\":{\"ping\":\"hello\"}}");
-
         api.shutdown();
-
         assertEquals(1, stream.recs.size());
         assertEquals(
             "{\"msg\":\"hello\"}",
@@ -129,13 +111,9 @@ public class EchoTest {
     @Test
     public void test04() throws Exception {
         StreamImpl stream = new StreamImpl();
-
         api.startup();
-
         api.execute(stream, "{\"pong\":{\"pong\":{\"_\":{\"ping\":\"hello\"}}}}");
-
         api.shutdown();
-
         //XXX: ??? assertEquals("{\"pong\":{\"pong\":{\"msg\":\"hello\"}}}", result);
         assertEquals(1, stream.recs.size());
         assertEquals(
@@ -147,26 +125,18 @@ public class EchoTest {
     @Test
     public void test05() throws Exception {
         StreamImpl stream = new StreamImpl();
-
         api.startup();
-
         api.execute(stream, "{\"_\":{\"pank\":\"\"}}");
-
         api.shutdown();
-
         assertEquals(0, stream.recs.size());
     }
 
     @Test
     public void test06() throws Exception {
         StreamImpl stream = new StreamImpl();
-
         api.startup();
-
         api.execute(stream, "{\"pong\":{\"_\":{\"ping\":\"hello\"}, \"param\":\"test\"}}");
-
         api.shutdown();
-
         assertEquals(1, stream.recs.size());
         assertEquals(
             "{\"_\":"
@@ -184,13 +154,9 @@ public class EchoTest {
     @Test
     public void test07() throws Exception {
         StreamImpl stream = new StreamImpl();
-
         api.startup();
-
         api.execute(stream, "{\"pong\":{\"_\":{\"blah\":{\"msg\":\"hello\"}}, \"param\":\"test\"}}");
-
         api.shutdown();
-
         assertEquals(2, stream.recs.size());
         assertEquals(
             "{\"_\":"
@@ -221,9 +187,7 @@ public class EchoTest {
     @Test
     public void test08() throws Exception {
         StreamImpl stream = new StreamImpl();
-
         api.startup();
-
         api.execute(stream,
             "{\"pong\":"
                 + "{\"_\":"
@@ -236,9 +200,7 @@ public class EchoTest {
                 + "\"param\":\"test\""
                 + "}"
             + "}");
-
         api.shutdown();
-
         assertEquals(2, stream.recs.size());
         assertEquals(
             "[{\"_\":"
