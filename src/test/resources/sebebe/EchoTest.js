@@ -44,5 +44,6 @@ tests({
             }
         });
         assertEquals(f({_ : {ping : {msg : "test"}}}), {pong : {msg : "test"}});
+        assertEquals(f({z : {_ : {ping : {msg : "test"}}}}), {_ : { z :{pong : {msg : "test"}}}});
     }
 });
