@@ -20,15 +20,25 @@
 package org.exist.sebebe;
 
 import org.apache.log4j.Logger;
+import org.exist.Database;
+import org.exist.EXistException;
+import org.exist.dom.NodeSet;
 import org.exist.dom.QName;
-import org.exist.xquery.BasicFunction;
-import org.exist.xquery.FunctionSignature;
-import org.exist.xquery.XPathException;
-import org.exist.xquery.XQueryContext;
-import org.exist.xquery.value.FunctionParameterSequenceType;
-import org.exist.xquery.value.FunctionReturnSequenceType;
-import org.exist.xquery.value.Sequence;
-import org.exist.xquery.value.SequenceType;
+import org.exist.security.PermissionDeniedException;
+import org.exist.security.Subject;
+import org.exist.security.xacml.AccessContext;
+import org.exist.source.DBSource;
+import org.exist.source.Source;
+import org.exist.source.SourceFactory;
+import org.exist.storage.DBBroker;
+import org.exist.storage.ProcessMonitor;
+import org.exist.xmldb.XmldbURI;
+import org.exist.xquery.*;
+import org.exist.xquery.value.*;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.exist.sebebe.Module.NAMESPACE_URI;
 import static org.exist.sebebe.Module.PREFIX;
@@ -41,7 +51,7 @@ import static org.exist.xquery.value.Type.*;
  * @author <a href="mailto:gazdovsky@gmail.com">Evgeny Gazdovsky</a>
  *
  */
-public class Execute extends BasicFunction {
+public class Execute extends Function {
 
     private final static Logger logger = Logger.getLogger(Execute.class);
 
@@ -61,10 +71,48 @@ public class Execute extends BasicFunction {
     public Execute(XQueryContext context, FunctionSignature signature) {
         super(context, signature);
     }
-    
+
     @Override
-    public Sequence eval(Sequence[] args, Sequence contextSequence) throws XPathException {
-        return EMPTY_SEQUENCE;
+    public Sequence eval(Sequence contextSequence, Item contextItem) throws XPathException {
+        try {
+            DBBroker broker = context.getBroker();
+            Subject subject = broker.getSubject();
+            Database db = broker.getDatabase();
+            ProcessMonitor pm = broker.getBrokerPool().getProcessMonitor();
+            String uri = getArgument(0).eval(contextSequence, contextItem).itemAt(0).getStringValue();
+            Source query = SourceFactory.getSource(db.get(subject), null, uri, false);
+            XQuery service = broker.getXQueryService();
+            XQueryContext context = new XQueryContext(db, AccessContext.XMLDB);
+            if (query instanceof DBSource) {
+                context.setModuleLoadPath(XmldbURI.EMBEDDED_SERVER_URI_PREFIX + ((DBSource)query).getDocumentPath().removeLastSegment().toString());
+            }
+            CompiledXQuery compiledQuery = service.compile(context, query);
+            try {
+                QName f = ((QNameValue) getArgument(1).eval(contextSequence, contextItem).itemAt(0)).getQName();
+                UserDefinedFunction function = context.resolveFunction(f, 1);
+                context.getProfiler().traceQueryStart();
+                pm.queryStarted(context.getWatchDog());
+                FunctionCall call = new FunctionCall(context, function);
+                List<Expression> a = new ArrayList<>(1);
+                a.add(getArgument(2));
+                call.setArguments(a);
+                call.analyze(new AnalyzeContextInfo());
+                return call.eval(NodeSet.EMPTY_SET);
+            } finally {
+                if (pm != null) {
+                    context.getProfiler().traceQueryEnd(context);
+                    pm.queryCompleted(context.getWatchDog());
+                }
+                compiledQuery.reset();
+                context.reset();
+            }
+        } catch (IOException e) {
+            throw new XPathException(this, e);
+        } catch (PermissionDeniedException e) {
+            throw new XPathException(this, e);
+        } catch (EXistException e) {
+            throw new XPathException(this, e);
+        }
     }
 
 }
