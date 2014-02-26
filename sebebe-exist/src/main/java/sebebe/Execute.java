@@ -17,7 +17,7 @@
  *  License along with this library; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-package org.exist.sebebe;
+package sebebe;
 
 import org.apache.log4j.Logger;
 import org.exist.Database;
@@ -40,11 +40,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.exist.sebebe.Module.NAMESPACE_URI;
-import static org.exist.sebebe.Module.PREFIX;
 import static org.exist.xquery.Cardinality.EXACTLY_ONE;
 import static org.exist.xquery.Cardinality.ZERO_OR_MORE;
-import static org.exist.xquery.value.Sequence.EMPTY_SEQUENCE;
 import static org.exist.xquery.value.Type.*;
 
 /**
@@ -57,7 +54,7 @@ public class Execute extends Function {
 
     public final static FunctionSignature signatures[] = {
             new FunctionSignature(
-                    new QName("cancel", NAMESPACE_URI, PREFIX),
+                    new QName("cancel", Module.NAMESPACE_URI, Module.PREFIX),
                     "Execute function of the module.",
                     new SequenceType[] {
                             new FunctionParameterSequenceType("uri", ANY_URI, EXACTLY_ONE, ""),
@@ -78,7 +75,7 @@ public class Execute extends Function {
             DBBroker broker = context.getBroker();
             Subject subject = broker.getSubject();
             Database db = broker.getDatabase();
-            ProcessMonitor pm = broker.getBrokerPool().getProcessMonitor();
+            ProcessMonitor pm = db.getProcessMonitor();
             String uri = getArgument(0).eval(contextSequence, contextItem).itemAt(0).getStringValue();
             Source query = SourceFactory.getSource(db.get(subject), null, uri, false);
             XQuery service = broker.getXQueryService();
