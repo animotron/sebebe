@@ -17,7 +17,7 @@
  *  License along with this library; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-package sebebe;
+package org.exist.sebebe;
 
 import org.apache.log4j.Logger;
 import org.exist.Database;
@@ -43,8 +43,6 @@ import static org.exist.xmldb.XmldbURI.EMBEDDED_SERVER_URI_PREFIX;
 import static org.exist.xquery.Cardinality.EXACTLY_ONE;
 import static org.exist.xquery.Cardinality.ZERO_OR_MORE;
 import static org.exist.xquery.value.Type.*;
-import static sebebe.Module.NAMESPACE_URI;
-import static sebebe.Module.PREFIX;
 
 /**
  * @author <a href="mailto:gazdovsky@gmail.com">Evgeny Gazdovsky</a>
@@ -56,7 +54,7 @@ public class Execute extends Function {
 
     public final static FunctionSignature signatures[] = {
             new FunctionSignature(
-                    new QName("execute", NAMESPACE_URI, PREFIX),
+                    new QName("execute", Module.NAMESPACE_URI, Module.PREFIX),
                     "Execute function of the module.",
                     new SequenceType[] {
                             new FunctionParameterSequenceType("uri", ANY_URI, EXACTLY_ONE, ""),
