@@ -22,17 +22,14 @@ package sebebe;
 import org.apache.log4j.Logger;
 import org.exist.Database;
 import org.exist.EXistException;
-import org.exist.dom.NodeSet;
 import org.exist.dom.QName;
 import org.exist.security.PermissionDeniedException;
 import org.exist.security.Subject;
-import org.exist.security.xacml.AccessContext;
 import org.exist.source.DBSource;
 import org.exist.source.Source;
 import org.exist.source.SourceFactory;
 import org.exist.storage.DBBroker;
 import org.exist.storage.ProcessMonitor;
-import org.exist.xmldb.XmldbURI;
 import org.exist.xquery.*;
 import org.exist.xquery.value.*;
 

@@ -21,10 +21,10 @@
  */
 package sebebe;
 
-import static com.fasterxml.jackson.databind.node.JsonNodeFactory.instance;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import static com.fasterxml.jackson.databind.node.JsonNodeFactory.instance;
 
 /**
  * @author <a href="mailto:shabanovd@gmail.com">Dmitriy Shabanov</a>
