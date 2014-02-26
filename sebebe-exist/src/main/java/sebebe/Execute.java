@@ -40,9 +40,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.exist.dom.NodeSet.EMPTY_SET;
+import static org.exist.security.xacml.AccessContext.XMLDB;
+import static org.exist.xmldb.XmldbURI.EMBEDDED_SERVER_URI_PREFIX;
 import static org.exist.xquery.Cardinality.EXACTLY_ONE;
 import static org.exist.xquery.Cardinality.ZERO_OR_MORE;
 import static org.exist.xquery.value.Type.*;
+import static sebebe.Module.NAMESPACE_URI;
+import static sebebe.Module.PREFIX;
 
 /**
  * @author <a href="mailto:gazdovsky@gmail.com">Evgeny Gazdovsky</a>
@@ -54,7 +59,7 @@ public class Execute extends Function {
 
     public final static FunctionSignature signatures[] = {
             new FunctionSignature(
-                    new QName("cancel", Module.NAMESPACE_URI, Module.PREFIX),
+                    new QName("execute", NAMESPACE_URI, PREFIX),
                     "Execute function of the module.",
                     new SequenceType[] {
                             new FunctionParameterSequenceType("uri", ANY_URI, EXACTLY_ONE, ""),
@@ -79,9 +84,9 @@ public class Execute extends Function {
             String uri = getArgument(0).eval(contextSequence, contextItem).itemAt(0).getStringValue();
             Source query = SourceFactory.getSource(db.get(subject), null, uri, false);
             XQuery service = broker.getXQueryService();
-            XQueryContext context = new XQueryContext(db, AccessContext.XMLDB);
+            XQueryContext context = new XQueryContext(db, XMLDB);
             if (query instanceof DBSource) {
-                context.setModuleLoadPath(XmldbURI.EMBEDDED_SERVER_URI_PREFIX + ((DBSource)query).getDocumentPath().removeLastSegment().toString());
+                context.setModuleLoadPath(EMBEDDED_SERVER_URI_PREFIX + ((DBSource)query).getDocumentPath().removeLastSegment().toString());
             }
             CompiledXQuery compiledQuery = service.compile(context, query);
             try {
@@ -94,7 +99,7 @@ public class Execute extends Function {
                 a.add(getArgument(2));
                 call.setArguments(a);
                 call.analyze(new AnalyzeContextInfo());
-                return call.eval(NodeSet.EMPTY_SET);
+                return call.eval(EMPTY_SET);
             } finally {
                 if (pm != null) {
                     context.getProfiler().traceQueryEnd(context);
